@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-// import { useForm } from "react-hook-form";
 import type { GetRef } from "antd";
-import { Button, Form, Input, Popconfirm, Table } from "antd";
+import { Form, Input, Popconfirm, Table } from "antd";
+import ReusableForm, { IField } from "../ReuseableForm";
 
 // import { IDuty, IFormInput } from "../../interfaces";
 
@@ -116,14 +116,31 @@ interface DataType {
 type ColumnTypes = Exclude<EditableTableProps["columns"], undefined>;
 
 const TodoList: React.FC = () => {
+    const [form] = Form.useForm();
+    const fields: IField[] = [
+        {
+            name: "id",
+            rules: [
+                { required: true, message: "Please input the id!" },
+                { pattern: new RegExp(/^[A-Za-z0-9]+$/), message: "ID must be a string!" }
+            ],
+            placeholder: "Enter id"
+        },
+        {
+            name: "name",
+            rules: [
+                { required: true, message: "Please input the name!" },
+                { pattern: new RegExp(/^[A-Za-z0-9]+$/), message: "Name must be a string!" }
+            ],
+            placeholder: "Enter name"
+        }
+    ];
+
     const [dataSource, setDataSource] = useState<DataType[]>([
-        { key: 1, id: "first", name: "duty1" },
-        { key: 2, id: "second", name: "duty2" }
+        { key: 1, id: "first", name: "duty1" }
     ]);
 
     const [count, setCount] = useState<number>(2);
-    const [newId, setNewId] = useState<IItem["id"]>("");
-    const [newDuty, setNewDuty] = useState<IItem["name"]>("");
 
     const handleDelete = (key: React.Key) => {
         const newData = dataSource.filter((item) => item.key !== key);
@@ -154,16 +171,21 @@ const TodoList: React.FC = () => {
         }
     ];
 
-    const handleAdd = () => {
-        const newData: DataType = {
-            key: count,
-            name: newDuty,
-            id: newId
-        };
-        setDataSource([...dataSource, newData]);
-        setCount(count + 1);
-        setNewId("");
-        setNewDuty("");
+    const handleAdd = async () => {
+        try {
+            const dutyObject: IItem = await form.validateFields();
+            const newData: DataType = {
+                key: count,
+                name: dutyObject.name,
+                id: dutyObject.id
+            };
+            setDataSource([...dataSource, newData]);
+            setCount(count + 1);
+            // Reset the form fields
+            form.resetFields();
+        } catch (error) {
+            console.log("Validation failed:", error);
+        }
     };
 
     const handleSave = (row: DataType) => {
@@ -202,21 +224,7 @@ const TodoList: React.FC = () => {
 
     return (
         <div>
-            <Input
-                placeholder="Enter id"
-                value={newId}
-                onChange={(e) => setNewId(e.target.value)}
-                style={{ marginRight: 10 }}
-            />
-            <Input
-                placeholder="Enter duty name"
-                value={newDuty}
-                onChange={(e) => setNewDuty(e.target.value)}
-                style={{ marginRight: 10 }}
-            />
-            <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
-                Add a row
-            </Button>
+            <ReusableForm form={form} handleAdd={handleAdd} fields={fields} />
             <Table
                 components={components}
                 rowClassName={() => "editable-row"}
