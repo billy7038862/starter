@@ -28,7 +28,7 @@ To get the project up and running, follow these steps:
 
 To start the server and launch the app, run:
 
-npm develop
+`npm develop`
 
 The app should now be running on [http://localhost:8080](http://localhost:8080).
 
