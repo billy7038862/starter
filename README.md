@@ -18,19 +18,16 @@ To get the project up and running, follow these steps:
 
 1. Clone the repository:
 
-bash
-git clone https://github.com/billy7038862/ts-react-starter.git
+`git clone https://github.com/billy7038862/ts-react-starter.git`
 
 2. Install the dependencies:
 
-bash
-npm install
+`npm install`
 
 ## Running the App
 
 To start the server and launch the app, run:
 
-bash
 npm start
 
 The app should now be running on [http://localhost:8080](http://localhost:8080).
