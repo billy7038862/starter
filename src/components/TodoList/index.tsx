@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import type { GetRef } from "antd";
 import { Form, Input, Popconfirm, Table } from "antd";
 import ReusableForm, { IField } from "../ReuseableForm";
+import instance from "../../http/instance";
 
 // import { IDuty, IFormInput } from "../../interfaces";
 
@@ -116,6 +117,15 @@ interface DataType {
 type ColumnTypes = Exclude<EditableTableProps["columns"], undefined>;
 
 const TodoList: React.FC = () => {
+    useEffect(() => {
+        const fetchTodos = async () => {
+            const res = await instance.get("/todos");
+
+            setDataSource(res?.data);
+            console.log(res.data);
+        };
+        fetchTodos();
+    }, []);
     const [form] = Form.useForm();
     const fields: IField[] = [
         {
@@ -136,9 +146,7 @@ const TodoList: React.FC = () => {
         }
     ];
 
-    const [dataSource, setDataSource] = useState<DataType[]>([
-        { key: 1, id: "first", name: "duty1" }
-    ]);
+    const [dataSource, setDataSource] = useState<DataType[]>([]);
 
     const [count, setCount] = useState<number>(2);
 
