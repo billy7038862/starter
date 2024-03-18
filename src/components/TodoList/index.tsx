@@ -2,9 +2,9 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import type { GetRef } from "antd";
 import { Form, Input, Popconfirm, Table } from "antd";
 import ReusableForm, { IField } from "../ReuseableForm";
-import instance from "../../http/instance";
+import DutyService from "../../service/duty.service";
 
-// import { IDuty, IFormInput } from "../../interfaces";
+import { IDataType } from "../../interfaces";
 
 type InputRef = GetRef<typeof Input>;
 type FormInstance<T> = GetRef<typeof Form<T>>;
@@ -108,23 +108,14 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 type EditableTableProps = Parameters<typeof Table>[0];
 
-interface DataType {
-    key: React.Key;
-    name: string;
-    id: string;
-}
-
 type ColumnTypes = Exclude<EditableTableProps["columns"], undefined>;
 
 const TodoList: React.FC = () => {
     useEffect(() => {
-        const fetchTodos = async () => {
-            const res = await instance.get("/todos");
-
-            setDataSource(res?.data);
-            console.log(res.data);
-        };
-        fetchTodos();
+        (async () => {
+            const duties = await DutyService.fetchDuties();
+            setDataSource(duties);
+        })();
     }, []);
     const [form] = Form.useForm();
     const fields: IField[] = [
@@ -146,13 +137,12 @@ const TodoList: React.FC = () => {
         }
     ];
 
-    const [dataSource, setDataSource] = useState<DataType[]>([]);
+    const [dataSource, setDataSource] = useState<IDataType[]>([]);
 
-    const [count, setCount] = useState<number>(2);
-
-    const handleDelete = (key: React.Key) => {
-        const newData = dataSource.filter((item) => item.key !== key);
-        setDataSource(newData);
+    const handleDelete = async (key: React.Key) => {
+        await DutyService.deleteDuty(key);
+        const duties = await DutyService.fetchDuties();
+        setDataSource(duties);
     };
 
     const defaultColumns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
@@ -182,13 +172,12 @@ const TodoList: React.FC = () => {
     const handleAdd = async () => {
         try {
             const dutyObject: IItem = await form.validateFields();
-            const newData: DataType = {
-                key: count,
-                name: dutyObject.name,
-                id: dutyObject.id
-            };
-            setDataSource([...dataSource, newData]);
-            setCount(count + 1);
+
+            await DutyService.addDuty(dutyObject);
+
+            const duties = await DutyService.fetchDuties();
+            setDataSource(duties);
+
             // Reset the form fields
             form.resetFields();
         } catch (error) {
@@ -196,15 +185,14 @@ const TodoList: React.FC = () => {
         }
     };
 
-    const handleSave = (row: DataType) => {
-        const newData = [...dataSource];
-        const index = newData.findIndex((item) => row.key === item.key);
-        const item = newData[index];
-        newData.splice(index, 1, {
-            ...item,
-            ...row
-        });
-        setDataSource(newData);
+    const handleSave = async (row: IDataType) => {
+        try {
+            await DutyService.updateDuty(row.key, row);
+            const duties = await DutyService.fetchDuties();
+            setDataSource(duties);
+        } catch (error) {
+            alert(error);
+        }
     };
 
     const components = {
@@ -220,7 +208,7 @@ const TodoList: React.FC = () => {
         }
         return {
             ...col,
-            onCell: (record: DataType) => ({
+            onCell: (record: IDataType) => ({
                 record,
                 editable: col.editable,
                 dataIndex: col.dataIndex,

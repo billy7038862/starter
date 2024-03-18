@@ -1,6 +1,7 @@
-interface IDuty {
-    id: string;
+interface IDataType {
+    key: React.Key;
     name: string;
+    id: string;
 }
 
-export default IDuty;
+export default IDataType;
