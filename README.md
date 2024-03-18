@@ -10,7 +10,7 @@ Configured with:
 
 ## Description
 
-This is a simple To-Do List app, built with React and TypeScript. It allows users to read, create, and update a list of duties.
+This is a simple To-Do List app, built with React and TypeScript. It allows users to read, create, and update/delete a list of duties.
 
 ## Project Setup
 
