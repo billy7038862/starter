@@ -19,7 +19,7 @@ To get the project up and running, follow these steps:
 1. Clone the repository:
 
 bash
-git clone https://github.com/billy7038862/starter.git
+git clone https://github.com/billy7038862/ts-react-starter.git
 
 2. Install the dependencies:
 
